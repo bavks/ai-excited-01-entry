@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""Tortoise Grand Prix — ai-excited-01 entry.
+"""Tortoise Grand Prix — make.fun ai-excited-01 entry.
 
-Ships the entry artwork: copies entry.jpg (stored next to this file)
-to <output>/entry.png, where <output> is $MAKEFUN_OUTPUT_DIR when set
-and /output otherwise. The contest gate accepts JPEG content by magic
-bytes even under a .png name.
+Copies the bundled artwork (entry.jpg, stored next to this file) to
+<output>/entry.png, where <output> is $MAKEFUN_OUTPUT_DIR when set and
+/output otherwise. The image bytes are copied verbatim, in chunks;
+the contest gate accepts JPEG content by magic bytes even under a
+.png name.
 
-Standard library only. Deterministic: the output bytes are exactly the
-source bytes, so repeated runs produce byte-identical files.
+Standard library only. Deterministic: repeated runs write identical
+bytes. The copy is verified — the number of bytes written must equal
+the source size, otherwise the program fails loudly.
 """
 
 import os
@@ -20,9 +22,8 @@ def output_dir():
     return os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
 
 
-def copy_verified(src, dst):
-    """Copy src to dst in chunks; verify the written size matches."""
-    expected = os.path.getsize(src)
+def copy_artwork(src, dst):
+    """Copy src to dst in chunks; return the number of bytes written."""
     written = 0
     with open(src, "rb") as fin, open(dst, "wb") as fout:
         while True:
@@ -31,12 +32,7 @@ def copy_verified(src, dst):
                 break
             fout.write(chunk)
             written += len(chunk)
-    actual = os.path.getsize(dst)
-    if written != expected or actual != expected:
-        raise IOError(
-            "size mismatch copying %s: source %d, wrote %d, on disk %d"
-            % (src, expected, written, actual)
-        )
+    return written
 
 
 def main():
@@ -45,7 +41,17 @@ def main():
     dst_dir = output_dir()
     os.makedirs(dst_dir, exist_ok=True)
     dst = os.path.join(dst_dir, "entry.png")
-    copy_verified(src, dst)
+
+    expected = os.path.getsize(src)
+    written = copy_artwork(src, dst)
+    if written != expected:
+        print(
+            f"error: wrote {written} bytes, expected {expected}",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"wrote {dst} ({written} bytes)")
     return 0
 
 
