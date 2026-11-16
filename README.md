@@ -1,21 +1,19 @@
 # Tortoise Grand Prix
 
-An entry for the make.fun contest **ai-excited-01** ("Make the AI judge excited").
+An entry for the make.fun **ai-excited-01** contest ("Make the AI judge excited").
 
-The image: a jet-powered tortoise Formula 1 grand prix. The hero tortoise —
-number 44, glasses on, deadly serious — leads the field into the corner with
-twin side-mounted jet engines blazing, a tall rear spoiler, and a carapace
-covered in sponsor decals. Behind him the rest of the tortoise grid strings
-out at proper racing gaps… and the fourth tortoise is spinning out in a
-cloud of smoke. Slow and steady was never an option.
+The image: a jet-powered tortoise Formula-1 grand prix. The hero tortoise —
+number 44, dead serious behind dark glasses, rear spoiler tall, a jet engine
+bolted to each side of its sponsor-covered shell — leads the field into the
+corner at full boost, flames streaming from the rear exhausts only. Behind it,
+a grid of rival racing tortoises runs at proper F1 gaps, and the fourth
+tortoise is spinning out in a cloud of smoke. Slow animal, absurd machinery,
+total commitment.
 
 ## How it runs
 
-`main.py` (Python 3, standard library only) copies the shipped image
-(`entry.jpg`, a JPEG the contest gate accepts by magic bytes) byte-for-byte
-to `$MAKEFUN_OUTPUT_DIR/entry.png` (default `/output/entry.png`). Every run
-produces exactly the same bytes.
-
-## License
-
-MIT — see `LICENSE`.
+`main.py` (Python 3, standard library only) copies the shipped artwork
+`entry.jpg` (1024×683 JPEG) byte-for-byte to
+`$MAKEFUN_OUTPUT_DIR/entry.png` (default output directory `/output`),
+creating the directory if needed. The copy is chunked and size-verified,
+so repeated runs always produce identical bytes.
