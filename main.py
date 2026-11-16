@@ -1,44 +1,53 @@
 #!/usr/bin/env python3
-"""Tortoise Grand Prix - make.fun ai-excited-01 entry.
+"""Tortoise Grand Prix — ai-excited-01 entry.
 
-Writes the shipped artwork (entry.jpg, a JPEG-encoded tortoise
-Formula-1 grand prix scene) to $MAKEFUN_OUTPUT_DIR/entry.png.
-The grader accepts PNG or JPEG by magic bytes, so the JPEG payload
-is copied byte-for-byte under the entry.png name.
+Ships the entry artwork: copies entry.jpg (stored next to this file)
+to <output>/entry.png, where <output> is $MAKEFUN_OUTPUT_DIR when set
+and /output otherwise. The contest gate accepts JPEG content by magic
+bytes even under a .png name.
+
+Standard library only. Deterministic: the output bytes are exactly the
+source bytes, so repeated runs produce byte-identical files.
 """
 
 import os
+import sys
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-SOURCE = os.path.join(HERE, "entry.jpg")
 CHUNK_SIZE = 64 * 1024
 
 
-def copy_verified(src: str, dest: str) -> None:
-    """Copy src to dest in chunks and verify the written size.
+def output_dir():
+    return os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
 
-    The grader runs this program twice and requires both outputs to
-    be byte-identical, so fail loudly rather than emit a short file.
-    """
+
+def copy_verified(src, dst):
+    """Copy src to dst in chunks; verify the written size matches."""
     expected = os.path.getsize(src)
     written = 0
-    with open(src, "rb") as fin, open(dest, "wb") as fout:
+    with open(src, "rb") as fin, open(dst, "wb") as fout:
         while True:
             chunk = fin.read(CHUNK_SIZE)
             if not chunk:
                 break
             fout.write(chunk)
             written += len(chunk)
-    if written != expected:
-        raise IOError(f"short copy: wrote {written} of {expected} bytes")
+    actual = os.path.getsize(dst)
+    if written != expected or actual != expected:
+        raise IOError(
+            "size mismatch copying %s: source %d, wrote %d, on disk %d"
+            % (src, expected, written, actual)
+        )
 
 
-def main() -> None:
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    dest = os.path.join(out_dir, "entry.png")
-    copy_verified(SOURCE, dest)
+def main():
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "entry.jpg")
+    dst_dir = output_dir()
+    os.makedirs(dst_dir, exist_ok=True)
+    dst = os.path.join(dst_dir, "entry.png")
+    copy_verified(src, dst)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
